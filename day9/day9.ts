@@ -8,71 +8,89 @@ const Left = "L";
 const Up = "U";
 const Down = "D";
 
-let headX = 0;
-let headY = 0;
-let tailX = 0;
-let tailY = 0;
-let moveSet = new Set();
-moveSet.add(tailX + "," + tailY);
+type Knot = {
+    x: number,
+    y: number,
+}
 
-function touchingHead(): boolean {
-    if (Math.abs(headX - tailX) > 1 || Math.abs(headY - tailY) > 1) {
+function touchingKnotAHead(head: Knot, knot: Knot): boolean {
+    if (Math.abs(head.x - knot.x) > 1 || Math.abs(head.y - knot.y) > 1) {
         return false;
     }
     return true;
 }
 
-function moveTail() {
-    //console.log("head at", headX, headY, " need to move tail from", tailX, tailY);
-    if (headY == tailY) {
-        if (headX > tailX) tailX++;
-        else tailX--;
+function moveKnot(head: Knot, knot: Knot) {
+    //console.log("head at", head.x, head.y, " need to move tail from", knot.x, knot.y);
+    if (head.y == knot.y) {
+        if (head.x > knot.x) knot.x++;
+        else knot.x--;
     }
-    if (headX == tailX) {
-        if (headY > tailY) tailY++;
-        else tailY--;
+    if (head.x == knot.x) {
+        if (head.y > knot.y) knot.y++;
+        else knot.y--;
     }
     //diagonal top left
-    if ((headX == tailX - 1 && headY == tailY + 2) || (headX == tailX - 2 && headY == tailY + 1)) {
-        tailX--;
-        tailY++;
+    if ((head.x == knot.x - 1 && head.y == knot.y + 2) || (head.x == knot.x - 2 && head.y == knot.y + 1)) {
+        knot.x--;
+        knot.y++;
     }
     //diagonal top right
-    if ((headX == tailX + 2 && headY == tailY + 1) || (headX == tailX + 1 && headY == tailY + 2)) {
-        tailX++;
-        tailY++;
+    if ((head.x == knot.x + 2 && head.y == knot.y + 1) || (head.x == knot.x + 1 && head.y == knot.y + 2)) {
+        knot.x++;
+        knot.y++;
     }
     //diagonal bottom left
-    if ((headX == tailX - 2 && headY == tailY - 1) || (headX == tailX - 1 && headY == tailY - 2)) {
-        tailX--;
-        tailY--;
+    if ((head.x == knot.x - 2 && head.y == knot.y - 1) || (head.x == knot.x - 1 && head.y == knot.y - 2)) {
+        knot.x--;
+        knot.y--;
     }
     //diagonal bottom right
-    if ((headX == tailX + 2 && headY == tailY - 1) || (headX == tailX + 1 && headY == tailY - 2)) {
-        tailX++;
-        tailY--;
+    if ((head.x == knot.x + 2 && head.y == knot.y - 1) || (head.x == knot.x + 1 && head.y == knot.y - 2)) {
+        knot.x++;
+        knot.y--;
     }
-    //console.log("moved tail to", tailX, tailY);
+    //console.log("moved tail to", knot.x, knot.y);
 }
 
-for (let i = 0; i < instructions.length; i++) {
-    const moveDirection = instructions[i][0];
-    const steps = Number(instructions[i][1]);
-    for (let m = 0; m < steps; m++) {
-        if (moveDirection == Right) headX++;
-        if (moveDirection == Left) headX--;
-        if (moveDirection == Up) headY++;
-        if (moveDirection == Down) headY--;
+function run(numOfKnots: number): number {
 
-        if (!touchingHead()) {
-            moveTail();
-            moveSet.add(tailX + "," + tailY);
+    let knots: Array<Knot> = [];
+    for (let i = 0; i < numOfKnots; i++) {
+        knots.push({
+            x: 0,
+            y: 0
+        })
+    }
+    let moveSet = new Set();
+
+    moveSet.add(0 + "," + 0);
+
+    for (let i = 0; i < instructions.length; i++) {
+        const moveDirection = instructions[i][0];
+        const steps = Number(instructions[i][1]);
+        for (let m = 0; m < steps; m++) {
+            if (moveDirection == Right) knots[0].x++;
+            if (moveDirection == Left) knots[0].x--;
+            if (moveDirection == Up) knots[0].y++;
+            if (moveDirection == Down) knots[0].y--;
+
+            for (let j = 1; j < numOfKnots; j++) {
+                if (!touchingKnotAHead(knots[j - 1], knots[j])) {
+                    moveKnot(knots[j - 1], knots[j]);
+                    if (numOfKnots - 1) moveSet.add(knots[j].x + "," + knots[j].y);
+                }
+            }
+
+            //console.log(head.x, head.y);
         }
-        //console.log(headX, headY);
     }
-}
 
-console.log(moveSet.size);
+    return moveSet.size;
+}
+//part 1;
+console.log(run(2));
+//console.log(run(9));
 
 
 
